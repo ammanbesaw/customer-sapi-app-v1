@@ -45,6 +45,5 @@ http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/sc
 		<http:request-connection host="${http.requester.sms.host}" port="${http.requester.sms.port}" protocol="HTTPS"/>
 	</http:request-config>
 	<global-property doc:name="Global Property" doc:id="0eb6fb62-de75-43b5-bebb-1f462ffe9437" name="env" value="local" />
-	<api-gateway:autodiscovery apiId="17831006" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="e23e580c-90d7-4bb8-9564-082a1f8f0127" flowRef="api-main" />
 
 </mule>
