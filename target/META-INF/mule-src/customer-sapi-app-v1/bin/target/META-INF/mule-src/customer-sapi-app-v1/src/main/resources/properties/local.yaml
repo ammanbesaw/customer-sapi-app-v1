@@ -1,0 +1,17 @@
+http: 
+  listener: 
+    host: "0.0.0.0"
+    port: "8081"
+  requester: 
+    sms: 
+      api_key: "6b87fa89"
+      api_secret: "Es1OaFlhunsdTkkQ"
+      from: "18882734314"
+      host: "rest.nexmo.com"
+      path: "/sms/json"
+      port: ""
+instanceID: "17815795"
+sfdc: 
+  password: "tn%47GAK!q#55#hcVMwy$yA"
+  securityToken: "aMVUpIpFUB4sgpcIM7dhJnbFT"
+  username: "ammanu99@gmail.com"

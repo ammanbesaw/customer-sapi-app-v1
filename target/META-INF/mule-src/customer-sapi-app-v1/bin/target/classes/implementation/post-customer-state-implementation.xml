@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<flow name="post-cutomer-state-implementation-flow" doc:id="0039b7e7-4433-416a-bbc9-86c078a63c3f" >
+	<choice doc:name="Choice" doc:id="19ac5132-861f-4c21-ac4c-f662eabd16df">
+			<when expression='#[vars.requestPayload.customerStateRequest.contactType == "mobile"]'>
+				<salesforce:query doc:name="Query Mobile" doc:id="f6d80cdf-9c07-4be9-adcf-a5fead77dfb6" config-ref="Salesforce_Config" >
+					<salesforce:salesforce-query ><![CDATA[SELECT status__c FROM customerState__c WHERE mobile__c = ':mobileNumber']]></salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"mobileNumber" : vars.requestPayload.customerStateRequest.'mobile'
+}]]]></salesforce:parameters>
+				</salesforce:query>
+			</when>
+			<otherwise >
+				<salesforce:query doc:name="Query Email" doc:id="c3886bcc-4450-4152-a674-cfa7bd3f7b05" config-ref="Salesforce_Config" >
+					<salesforce:salesforce-query ><![CDATA[select status__c from customerState__c where email__c = ':email']]></salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"email" : vars.requestPayload.customerStateRequest.email
+}]]]></salesforce:parameters>
+				</salesforce:query>
+			</otherwise>
+		</choice>
+		<choice doc:name="Choice" doc:id="06146f31-7e0d-44f8-9603-39cb2ed32909" >
+			<when expression='#[sizeOf(payload) != 0]'>
+				<raise-error doc:name="Raise error" doc:id="a196c5fc-02cc-49eb-ab27-4c82b9e4e1cf" type="CS:INVALID_USER" description="User Already Exists"/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message to Create SFDC Request Payload for Registration" doc:id="108ab05f-488d-4e8a-ba14-442eefcc096e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[{
+    "contactType__c": vars.requestPayload.customerStateRequest.contactType,
+    "countryCode__c": vars.requestPayload.customerStateRequest.countryCode,
+    "mobile__c": vars.requestPayload.customerStateRequest.mobile,
+    "password__c": vars.requestPayload.customerStateRequest.password,
+    "status__c": vars.requestPayload.customerStateRequest.status,
+    "email__c": vars.requestPayload.customerStateRequest.email default ""
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<logger level="INFO" doc:name="Request Logger For SFDC Call" doc:id="b605cae8-1953-44d2-a6ad-a4d5ba339a8c" message="#[%dw 2.0&#10;output application/json indent = false&#10;---&#10;{&#10;    TimeStamp: now(), &#10;    transactionId: vars.headers.'x-cms-transactionId',&#10;    AppName: app.name,&#10;    FLowName: flow.name,&#10;    BusinessProcessName: &quot;Get Transaction SFDC&quot;,&#10;    Category: &quot;Customer&quot;,&#10;    OriginatingApplication: &quot;Process API&quot;,&#10;    DesinationApplication: &quot;SalesForce&quot;,&#10;    CustomerId: &quot;NA&quot;,&#10;    txnState: &quot;SFDC Request&quot;&#10;}]" />
+				<salesforce:create doc:name="Create" doc:id="4ef32f64-030f-41ee-b023-7b651d5d59e4" config-ref="Salesforce_Config" type="customerState__c" />
+				<logger level="INFO" doc:name="Response Logger For SFDC Call" doc:id="3ea7b5a4-81e1-4e60-9011-92d22892c880" message="#[%dw 2.0&#10;output application/json indent = false&#10;---&#10;{&#10;    TimeStamp: now(),&#10;    transactionId: vars.headers.'x-cms-transactionId',&#10;    AppName: app.name,&#10;    FlowName: flow.name,&#10;    BusinessProcessName: &quot;Get Transaction SFDC&quot;,&#10;    Category: &quot;Customer&quot;,&#10;    OriginatingApplication: &quot;Process API&quot;,&#10;    DesinationApplication: &quot;SalesForce&quot;,&#10;    CustomerId: &quot;NA&quot;,&#10;    txnState: &quot;SFDC Response&quot;&#10;}]" />
+				<ee:transform doc:name="Transform Message to Create Customer State SAPI Response" doc:id="625068e8-a14f-4296-ae47-a5e5b49ec96d">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  customerStateResponse: {
+    eventInstanceId: vars.headers.'x-cms-transactionId',
+    status: if(payload.successful == true)("Successful")else("Failed")
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

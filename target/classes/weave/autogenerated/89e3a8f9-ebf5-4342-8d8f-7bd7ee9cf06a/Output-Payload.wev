@@ -1,0 +1,14 @@
+%dw 2.0
+
+type auto_89e3a8f9_ebf5_4342_8d8f_7bd7ee9cf06a_Output_Payload = {|
+  msg: String, 
+  code: Number, 
+  success: Boolean, 
+  eventId: String, 
+  error: {|
+    "type": String, 
+    title: String, 
+    details: String
+  |}
+|}
+

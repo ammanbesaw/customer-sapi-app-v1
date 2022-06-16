@@ -1,0 +1,20 @@
+%dw 2.0
+
+type auto_0039b7e7_4433_416a_bbc9_86c078a63c3f_Input_Payload = {
+  registrationRequest: {
+    password: String, 
+    acceptDataPolicy: Boolean, 
+    recieveClaimsettle: Boolean, 
+    countryCode?: "+91" | "+1", 
+    recieveNews: Boolean, 
+    acceptPIC: Boolean, 
+    mobile?: String, 
+    captchatoken: String, 
+    contactType: "mobile" | "email", 
+    locale: "en" | "zh", 
+    email?: String, 
+    _?: Any
+  }, 
+  _?: Any
+}
+
